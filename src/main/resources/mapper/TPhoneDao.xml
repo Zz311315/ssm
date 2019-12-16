@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.by.dao.TPhoneDao">
+
+    <resultMap type="com.by.entity.TPhone" id="TPhoneMap">
+        <result property="phoneId" column="phone_id" jdbcType="INTEGER"/>
+        <result property="phoneName" column="phone_name" jdbcType="VARCHAR"/>
+        <result property="phoneInf" column="phone_inf" jdbcType="VARCHAR"/>
+        <result property="phoneKc" column="phone_kc" jdbcType="INTEGER"/>
+        <result property="phoneCd" column="phone_cd" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="TPhoneMap">
+        select
+          phone_id, phone_name, phone_inf, phone_kc, phone_cd
+        from test.t_phone
+        where phone_id = #{phoneId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="TPhoneMap">
+        select
+          phone_id, phone_name, phone_inf, phone_kc, phone_cd
+        from test.t_phone
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="TPhoneMap">
+        select
+          phone_id, phone_name, phone_inf, phone_kc, phone_cd
+        from test.t_phone
+        <where>
+            <if test="phoneId != null">
+                and phone_id = #{phoneId}
+            </if>
+            <if test="phoneName != null and phoneName != ''">
+                and phone_name = #{phoneName}
+            </if>
+            <if test="phoneInf != null and phoneInf != ''">
+                and phone_inf = #{phoneInf}
+            </if>
+            <if test="phoneKc != null">
+                and phone_kc = #{phoneKc}
+            </if>
+            <if test="phoneCd != null and phoneCd != ''">
+                and phone_cd = #{phoneCd}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="phoneId" useGeneratedKeys="true">
+        insert into test.t_phone(phone_name, phone_inf, phone_kc, phone_cd)
+        values (#{phoneName}, #{phoneInf}, #{phoneKc}, #{phoneCd})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update test.t_phone
+        <set>
+            <if test="phoneName != null and phoneName != ''">
+                phone_name = #{phoneName},
+            </if>
+            <if test="phoneInf != null and phoneInf != ''">
+                phone_inf = #{phoneInf},
+            </if>
+            <if test="phoneKc != null">
+                phone_kc = #{phoneKc},
+            </if>
+            <if test="phoneCd != null and phoneCd != ''">
+                phone_cd = #{phoneCd},
+            </if>
+        </set>
+        where phone_id = #{phoneId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="delete">
+        delete from test.t_phone where phone_id = #{id}
+    </delete>
+    <select id="find" resultMap="TPhoneMap">
+        select * from t_phone
+    </select>
+
+
+</mapper>

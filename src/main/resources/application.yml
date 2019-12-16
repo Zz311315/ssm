@@ -1,0 +1,48 @@
+spring:
+  data:
+    solr:
+      host: http://127.0.0.1:8080/solr/solr
+
+  mvc:
+    view:
+      prefix: /WEB-INF/view/
+      suffix: .jsp
+
+  activemq:
+    broker-url: tcp://127.0.0.1:61616
+    user: admin
+    password: admin
+    packages:
+      trust-all: true
+
+  jms:
+    pub-sub-domain: false
+
+mybatis:
+  mapper-locations: classpath:mapper/*Dao.xml
+  type-aliases-package: com.by.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+
+
+dubbo:
+  registry:
+    protocol: zookeeper
+    address: 127.0.0.1:2181
+  application:
+    name: dubbo_boot_consumer
+  consumer:
+    timeout: 3000
+    retries: 5
+
+server:
+  port: 8089
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count
+

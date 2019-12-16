@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/layui/2.4.5/css/layui.css}">
+    <script th:src="@{/webjars/layui/2.4.5/layui.js}"></script>
+</head>
+<body>
+
+<div class="layui-collapse" >
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">搜索框</h2>
+        <div class="layui-colla-content">
+            <form class="layui-form" >
+                <div class="layui-form-item">
+                    <label class="layui-form-label">手机搜索</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="mmm" lay-verify="title" autocomplete="off" placeholder="请输入" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button class="layui-btn" lay-submit="form1" lay-filter="selectForm">搜索</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div style="display: none" id="add">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label"></label>
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phoneName" required lay-verify="required" placeholder="请输入名称"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">详情</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phoneInf" required lay-verify="required" placeholder="请输入详情"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">库存</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phoneKc" required lay-verify="required" placeholder="请输入库存"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">产地</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phoneCd" required lay-verify="required" placeholder="请输入产地"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="addFrom">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <input type="hidden" id="userId1" name="userId">
+    </form>
+</div>
+
+<table id="userTable" lay-filter="userTableFilter"></table>
+
+</body>
+<script>
+    //注意：折叠面板 依赖 element 模块，否则无法进行功能性操作
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+</script>
+<script>
+
+    /*
+        toolbar：工具栏
+            添加在 table 中，在表格的顶部添加工具栏
+            添加在 cols 中，在表格的列中添加工具栏
+            toolbar: '#userToolBar'  找 script标签的id
+     */
+    layui.use(['table', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        //第一个实例
+        table.render({
+            elem: '#userTable'//对应table载体的id
+            , height: 'full-60'
+            , url: '/phone/sl' //加载json数据
+            , page: true //开启分页
+            , toolbar: '#tableToolBar'
+            , cols: [
+                [ //表头
+                    {type: 'checkbox', fixed: 'left'}//复选框
+                    , {field: 'phoneId', title: '编号', sort: true, fixed: 'left'}
+                    , {field: 'phoneName', title: '名称'}
+                    , {field: 'phoneInf', title: '详情'}
+                    , {field: 'phoneKc', title: '库存'}
+                    , {field: 'phoneCd', title: '产地'}
+                    , {fixed: 'right', title: '操作', toolbar: '#userToolBar', width: 200}
+                ]]
+        });
+
+
+
+
+        //对行的监听
+        table.on('tool(userTableFilter)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+            if (layEvent === '') { //增加
+            } else if (layEvent === 'del') { //删除
+                layer.confirm('真的删除行么', function (index) {
+                    $.post("/phone/phone" + data.phoneId, {"_method": "delete"}, function (data) {
+                        if (data.success) {
+                            obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                        } else if (data.error) {
+                            layer.msg('删除失败');
+                        }
+                    }, "json")
+                    layer.close(index);
+                    //向服务端发送删除指令
+                });
+            } else if (layEvent === 'update') {
+                var stuId = data.stuId;
+                $("#userId3").val(stuId);
+
+                //动态查询角色，加载数据，并选中
+                active.updateHui(stuId);
+
+                layer.open({
+                    type: 1,
+                    title: "编辑",
+                    content: $("#update") //这里content是一个普通的String
+                    , area: ['500PX', '500px']
+                    , icon: 0
+                });
+
+            } else if (layEvent === 'givePres') {
+
+            }
+        });
+
+        //对表格顶部工具栏的监听 toolbar
+        table.on('toolbar(userTableFilter)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'add':
+                    layer.open({
+                        type: 1,
+                        area: ['500px', '400px'],
+                        content: $('#add')
+                    })
+            }
+            ;
+        });
+
+
+
+
+        layui.use('form', function () {
+            var form = layui.form;
+
+
+
+            //增加监听提交
+            form.on('submit(addFrom)', function (data) {
+                console.log(data.field);//角色ids
+                //ajax赋角色
+                $.post("/phone/add", data.field, function (data) {
+                    if (data.success) {
+                        table.reload("userTable", {page: {curr: 1}});//从第一页加载
+                    } else {
+                        layer.msg('增加失败！');
+                    }
+                    layer.closeAll();
+                }, "json")
+                return false;//防止表单自动提交
+            });
+            //条件查询监听提交
+            form.on('submit(selectForm)', function (data) {
+
+                table.reload('userTable', {
+                    url: "/phone/sl"
+                    , where: data.field //设定异步数据接口的额外参数
+                    , page: {
+                        curr: 1
+                    }
+                });
+                return false;
+            });
+
+
+        });
+
+    });
+</script>
+<script type="text/html" id="userToolBar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script type="text/html" id="tableToolBar">
+    <a class="layui-btn layui-btn-xs" lay-event="add">增加</a>
+</script>
+
+</body>
+</html>
